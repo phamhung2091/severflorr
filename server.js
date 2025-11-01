@@ -1,7 +1,9 @@
 import { WebSocketServer } from "ws";
-import { Packr } from "msgpackr"; // 1. Import Packr
+import { Packr } from "msgpackr"; // Import thư viện MessagePack
 
-const packr = new Packr(); // 2. Khởi tạo Packr
+// Khởi tạo bộ đóng gói MessagePack
+const packr = new Packr(); 
+
 const PORT = process.env.PORT || 8080;
 
 const wss = new WebSocketServer({ port: PORT });
@@ -11,17 +13,22 @@ console.log(`✅ WebSocket server running on port ${PORT}`);
 wss.on("connection", (ws) => {
     console.log("💡 Client connected");
 
-    // 3. Gửi WELCOME bằng MessagePack (Buffer)
+    // Gửi WELCOME: đóng gói object JS thành Buffer MessagePack
     ws.send(packr.pack({ type: "welcome", message: "Connected to custom server!" }));
 
     ws.on("message", (msg) => {
-        // 4. Giải mã dữ liệu nhận được từ client
-        const clientData = packr.unpack(msg);
+        // Giải mã dữ liệu nhận được (Buffer) thành Object JS
+        try {
+            const clientData = packr.unpack(msg);
+            console.log("📩 Received:", clientData);
 
-        console.log("📩 Received:", clientData);
+            // Gửi ECHO lại bằng MessagePack
+            ws.send(packr.pack({ type: "echo", received: clientData }));
 
-        // 5. Gửi ECHO lại bằng MessagePack (Buffer)
-        ws.send(packr.pack({ type: "echo", received: clientData }));
+        } catch (e) {
+            console.error("Lỗi giải mã MessagePack:", e);
+            // Có thể server nhận được chuỗi không phải MessagePack
+        }
     });
 
     ws.on("close", () => {
