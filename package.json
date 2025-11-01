@@ -2,7 +2,7 @@
   "name": "florrremake-server",
   "version": "1.0.0",
   "main": "server.js",
-  "type": "module",  //<-- Đã thêm đúng
+  "type": "module",  
   "scripts": {
     "start": "node server.js"
   },
